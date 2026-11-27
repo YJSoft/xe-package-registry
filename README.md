@@ -1,0 +1,9 @@
+# XE 쉬운설치 자료실
+
+XE 비공식 패치의 쉬운설치 모듈에서 읽는 공개 자료실입니다. 자료 목록과 상세 정보, 배포 ZIP은 [GitHub Pages](https://yjsoft.github.io/xe-package-registry/)에서 제공합니다.
+
+등록 자료와 버전은 `packages.json`에서 관리합니다. 커밋 SHA, ZIP 바이트 수와 SHA-256, 설치 트리 SHA-256, 지원 환경, 원본 제작자와 라이선스를 기록합니다. 코드 검토 후 등록하고 철회한 버전은 삭제하지 말고 `withdrawn`을 true로 변경하세요. 게시한 버전의 파일은 교체하지 않습니다.
+
+PR에서 `python3 publish.py /tmp/xe-registry-preview` 검사를 실행합니다. 기본 브랜치 반영 후 GitHub Pages 환경의 RSA 키로 목록에 서명합니다. 서명 대상은 봉투의 `payload`를 Base64 디코딩한 UTF-8 바이트이며 알고리즘은 RSA PKCS#1 v1.5/SHA-256입니다. 목록은 21일 후 만료되며 주 2회 다시 게시합니다. `v1/index.json`의 세대 번호는 발행 시각(UTC Unix 초)입니다. 각 상세 JSON과 ZIP은 SHA-256을 파일명으로 사용합니다.
+
+키를 교체할 때는 클라이언트 공개키도 함께 배포해야 합니다. 개인키는 등록 저장소와 공개 파일에 포함하지 않습니다. 복구 시 저장한 개인키와 등록 내역으로 빌드한 뒤 기존 클라이언트로 서명과 ZIP을 확인하세요.

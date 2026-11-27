@@ -1,0 +1,52 @@
+name: Package registry
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '12 3 * * 1,4'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - run: python3 publish.py "$RUNNER_TEMP/preview"
+  publish:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: publish
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Build and sign
+        env:
+          REGISTRY_KEY: ${{ secrets.REGISTRY_SIGNING_KEY }}
+        run: |
+          set -eu
+          umask 077
+          key=$(mktemp)
+          trap 'rm -f "$key"' EXIT
+          printf '%s\n' "$REGISTRY_KEY" > "$key"
+          unset REGISTRY_KEY
+          python3 publish.py public --key "$key"
+          chmod -R a+rX public
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
+        with:
+          path: public
+      - name: Deploy
+        id: deploy
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
