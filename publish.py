@@ -16,6 +16,13 @@ from zipfile import ZipFile
 
 HERE = Path(__file__).resolve().parent
 LIMIT = 32 * 1024 * 1024
+ENTRYPOINTS = {'module': '{id}.class.php', 'widget': '{id}.class.php', 'addon': '{id}.addon.php', 'layout': 'layout.html'}
+RESERVED = {
+    'module': 'addon admin adminlogging autoinstall board comment communication counter document editor file importer install integration_search krzip layout member menu message module packageinstaller page point poll rss seo session spamfilter tag trash widget',
+    'addon': 'adminlogging autolink captcha captcha_member counter member_communication member_extra_info oembed point_level_icon resize_image',
+    'widget': 'content counter_status language_select login_info mcontent',
+    'layout': 'default user_layout xedition',
+}
 
 
 def serialized(obj):
@@ -53,8 +60,9 @@ def verify_release(package, release, archive):
             kind = stat.S_IFMT(item.external_attr >> 16)
             require(size <= LIMIT and item.file_size <= 8 * 1024 * 1024 and kind in (0, stat.S_IFDIR, stat.S_IFREG), 'invalid ZIP entry')
             entries[path] = '-' if item.is_dir() else digest(z.read(item))
-        require(package['id'] + '.class.php' in entries, 'missing module class')
+        require(ENTRYPOINTS[package['type']].format(id=package['id']) in entries, 'missing package entry point')
         info = ET.fromstring(z.read(prefix + 'conf/info.xml'))
+        require(info.tag == package['type'], 'package type mismatch')
         require(info.findtext('version') == release['version'], 'module version mismatch')
     tree = b''.join((name + '\0' + entries[name] + '\n').encode() for name in sorted(entries))
     require(digest(tree) == release['tree'], 'installed tree digest mismatch')
@@ -71,7 +79,7 @@ def check_history(old, packages):
     current = {p['id']: p for p in packages}
     for before in old:
         after = current.get(before['id'])
-        require(after and before['repo'] == after['repo'], 'registered package identity changed')
+        require(after and before['repo'] == after['repo'] and before.get('type', 'module') == after['type'], 'registered package identity changed')
         versions = {r['version']: r for r in after['releases']}
         for r in before['releases']:
             new = versions.get(r['version'])
@@ -86,6 +94,7 @@ def build(output, key, baseline):
     links = []
     for p in packages:
         name = p['id']
+        require(p['type'] in ENTRYPOINTS and name not in RESERVED[p['type']].split(), 'reserved installation path')
         require(re.fullmatch(r'[a-z][a-z0-9_]*', name) and name not in summaries, 'invalid or duplicate module id')
         require(re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_-]+', p['repo']), 'invalid repository')
         versions = set()

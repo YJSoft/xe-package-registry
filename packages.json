@@ -21,7 +21,8 @@
         "withdrawn": false,
         "notes": "비회원 댓글 알림의 보안 문제를 수정한 릴리스."
       }
-    ]
+    ],
+    "type": "module"
   },
   {
     "id": "advanced_mailer",
@@ -45,6 +46,7 @@
         "withdrawn": false,
         "notes": "메일 발송 API 및 PHP 8 관리자 테스트 발송 수정. 빈 도메인 그룹의 설정 화면 오류 수정."
       }
-    ]
+    ],
+    "type": "module"
   }
 ]
