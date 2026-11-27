@@ -6,13 +6,11 @@ import hashlib
 import html
 import io
 import json
-import os
 from pathlib import Path
 import re
 import stat
 import subprocess
 import time
-import urllib.request
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
 
@@ -69,8 +67,21 @@ def atomic_write(path, data):
     tmp.replace(path)
 
 
-def build(output, key):
+def check_history(old, packages):
+    current = {p['id']: p for p in packages}
+    for before in old:
+        after = current.get(before['id'])
+        require(after and before['repo'] == after['repo'], 'registered package identity changed')
+        versions = {r['version']: r for r in after['releases']}
+        for r in before['releases']:
+            new = versions.get(r['version'])
+            require(new and all(new[k] == r[k] for k in ('revision','size','sha256','tree')), 'published artifact changed or disappeared')
+
+
+def build(output, key, baseline):
     packages = json.loads((HERE / 'packages.json').read_text())
+    if baseline:
+        check_history(json.loads(baseline.read_text()), packages)
     summaries = {}
     links = []
     for p in packages:
@@ -82,9 +93,10 @@ def build(output, key):
             require(re.fullmatch(r'[0-9a-f]{40}', r['revision']) and 0 < r['size'] <= LIMIT, 'invalid revision or size')
             require(r['version'] not in versions and isinstance(r['withdrawn'], bool), 'duplicate or invalid release')
             versions.add(r['version'])
-            source = 'https://codeload.github.com/' + p['repo'] + '/zip/' + r['revision']
-            with urllib.request.urlopen(source, timeout=60) as response:
-                archive = response.read(r['size'] + 1)
+            require(re.fullmatch(r'[0-9a-f]{64}', r['sha256']), 'invalid archive hash')
+            path = HERE / 'archives' / (r['sha256'] + '.zip')
+            require(path.is_file() and path.stat().st_size == r['size'], 'approved ZIP missing')
+            archive = path.read_bytes()
             verify_release(p, r, archive)
             atomic_write(output / 'v1/files' / (r['sha256'] + '.zip'), archive)
         require(versions, 'empty release list')
@@ -107,6 +119,7 @@ def build(output, key):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('output', type=Path)
+    parser.add_argument('--baseline', type=Path, help='previously published packages.json')
     parser.add_argument('--key', help='PEM private key, for a trusted production build')
     args = parser.parse_args()
-    build(args.output, args.key)
+    build(args.output, args.key, args.baseline)

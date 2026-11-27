@@ -15,7 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - run: python3 publish.py "$RUNNER_TEMP/preview"
+        with:
+          fetch-depth: 0
+      - name: Validate archives and published versions
+        env:
+          BASE_COMMIT: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if test -n "$BASE_COMMIT" && git show "$BASE_COMMIT:packages.json" > "$RUNNER_TEMP/baseline.json"; then
+            python3 publish.py "$RUNNER_TEMP/preview" --baseline "$RUNNER_TEMP/baseline.json"
+          else
+            python3 publish.py "$RUNNER_TEMP/preview"
+          fi
   publish:
     needs: validate
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
