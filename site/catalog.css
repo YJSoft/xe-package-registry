@@ -74,6 +74,7 @@ header { border-bottom: 1px solid var(--rule); }
 .download:active { transform: translateY(2px); box-shadow: none; }
 footer { background: var(--graphite); color: var(--graphite-text); }
 .foot { min-height: 7rem; padding-block: 1.5rem; }
+.foot p { color: var(--graphite-muted); font-size: .875rem; }
 .foot a { color: var(--graphite-text); }
 @media (max-width: 60rem) {
   .group { display: block; margin-top: 2.5rem; }
