@@ -17,23 +17,25 @@ from catalogue import SITE, render
 
 HERE = Path(__file__).resolve().parent
 LIMIT = 32 * 1024 * 1024
-ENTRYPOINTS = {'module': '{id}.class.php', 'widget': '{id}.class.php', 'addon': '{id}.addon.php', 'layout': 'layout.html'}
+ENTRYPOINTS = {'module': '{id}.class.php', 'widget': '{id}.class.php', 'addon': '{id}.addon.php', 'layout': 'layout.html', 'mobile_layout': 'layout.html'}
 RESERVED = {
     'module': 'addon admin adminlogging autoinstall board comment communication counter document editor file importer install integration_search krzip layout member menu message module packageinstaller page point poll rss seo session spamfilter tag trash widget',
     'addon': 'adminlogging autolink captcha captcha_member counter member_communication member_extra_info oembed point_level_icon resize_image',
     'widget': 'content counter_status language_select login_info mcontent',
     'layout': 'default user_layout xedition',
+    'mobile_layout': 'default simplegray colorcode',
 }
 
 
 # Only nested component locations reviewed for this installer are accepted.
 SKIN_PARENTS = {
-    'module_skin': {'modules/member/skins', 'modules/communication/skins'},
+    'module_skin': {'modules/board/skins', 'modules/member/skins', 'modules/communication/skins'},
+    'mobile_module_skin': {'modules/board/m.skins', 'modules/member/m.skins', 'modules/communication/m.skins'},
     'editor_style': {'modules/editor/styles'},
     'widget_skin': {'widgets/content/skins'},
 }
 BUILTIN_SKINS = {'default', 'ckeditor_light', 'ckeditor_recommend', 'dreditor', 'xestyle', 'xestyleblack'}
-DIRECTORIES = {'module': 'modules', 'addon': 'addons', 'layout': 'layouts', 'widget': 'widgets'}
+DIRECTORIES = {'module': 'modules', 'addon': 'addons', 'layout': 'layouts', 'mobile_layout': 'm.layouts', 'widget': 'widgets'}
 
 
 def install_path(package):
@@ -41,10 +43,15 @@ def install_path(package):
     if kind in SKIN_PARENTS:
         parent, _, folder = package.get('source_path', '').rpartition('/')
         require(parent in SKIN_PARENTS[kind] and re.fullmatch(r'[a-z][a-z0-9_]{0,63}', folder)
-                and folder not in BUILTIN_SKINS, 'invalid skin destination')
-        category = 'style' if kind == 'editor_style' else 'skin'
+                and folder not in BUILTIN_SKINS and package['source_path'] not in
+                ('modules/board/skins/xedition', 'modules/board/m.skins/simplegray'), 'invalid skin destination')
+        category = {'editor_style': 'style', 'mobile_module_skin': 'mskin'}.get(kind, 'skin')
         require(name == '_'.join([parent.split('/')[1], category, folder]), 'skin identity mismatch')
         return parent + '/' + folder
+    if kind == 'mobile_layout':
+        match = re.fullmatch(r'mobile_layout_([a-z][a-z0-9_]*)', name)
+        require(match and 'source_path' in package, 'invalid mobile layout identity')
+        name = match[1]
     require(kind in DIRECTORIES and name not in RESERVED[kind].split(), 'reserved installation path')
     target = DIRECTORIES[kind] + '/' + name
     require(package.get('source_path', target) == target, 'component source path mismatch')
@@ -91,7 +98,10 @@ def verify_release(package, release, archive):
         if not skin:
             require(ENTRYPOINTS[package['type']].format(id=package['id']) in entries, 'missing package entry point')
         info = ET.fromstring(z.read(prefix + descriptor))
-        require(info.tag == ('skin' if skin else package['type']), 'package type mismatch')
+        expected_tag = 'skin' if skin else package['type']
+        if expected_tag == 'mobile_layout':
+            expected_tag = 'layout'
+        require(info.tag == expected_tag, 'package type mismatch')
         require(info.findtext('version') == release['version'], 'module version mismatch')
     tree = b''.join((name + '\0' + entries[name] + '\n').encode() for name in sorted(entries))
     require(digest(tree) == release['tree'], 'installed tree digest mismatch')
@@ -141,6 +151,7 @@ def build(output, key, baseline):
         check_history(json.loads(baseline.read_text()), packages)
     by_id = validate_dependencies(packages)
     summaries = {}
+    v2 = {}
     legacy = {}
     for p in packages:
         name = p['id']
@@ -163,7 +174,9 @@ def build(output, key, baseline):
         location = 'v1/details/' + digest(detail) + '.json'
         atomic_write(output / location, detail)
         summaries[name] = digest(detail)
-        if 'source_path' not in p and not p.get('requires'):
+        if p['type'] not in ('mobile_module_skin', 'mobile_layout') and not p.get('source_path', '').startswith('modules/board/skins/'):
+            v2[name] = digest(detail)
+        if name in v2 and 'source_path' not in p and not p.get('requires'):
             legacy[name] = digest(detail)
         if 'thumbnail' in p:
             filename = p['thumbnail']
@@ -171,6 +184,13 @@ def build(output, key, baseline):
             image = (HERE / 'thumbnails' / filename).read_bytes()
             require(image.startswith(b'\x89PNG\r\n\x1a\n') and len(image) <= 512 * 1024, 'invalid PNG thumbnail')
             atomic_write(output / 'v1/thumbnails' / filename, image)
+    # Older clients reject an entire index if any package uses an unknown destination.
+    while True:
+        missing = [name for name in v2 if any(dep not in v2 for dep in by_id[name].get('requires', []))]
+        if not missing:
+            break
+        for name in missing:
+            del v2[name]
     for filename in ('catalog.css', 'logo-light.png', 'logo-dark.png', 'favicon-light.png'):
         atomic_write(output / 'assets' / filename, (SITE / filename).read_bytes())
     atomic_write(output / 'index.html', render(packages, by_id))
@@ -178,7 +198,7 @@ def build(output, key, baseline):
         now = int(time.time())
         public = subprocess.check_output(['openssl','pkey','-in',key,'-pubout'])
         require(public == (HERE / 'registry.pem').read_bytes(), 'signing key mismatch')
-        for schema, filename, catalog in [(1, 'index.json', legacy), (2, 'index-v2.json', summaries)]:
+        for schema, filename, catalog in [(1, 'index.json', legacy), (2, 'index-v2.json', v2), (3, 'index-v3.json', summaries)]:
             payload = serialized(dict(schema=schema, generation=now, issued=now, expires=now + 21 * 86400, packages=catalog))
             sig = subprocess.run(['openssl','dgst','-sha256','-sign',key], input=payload, capture_output=True, check=True).stdout
             atomic_write(output / 'v1' / filename, serialized(dict(payload=base64.b64encode(payload).decode(), signature=base64.b64encode(sig).decode())))

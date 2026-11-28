@@ -22,7 +22,9 @@ body:
         - 애드온 (addon)
         - 위젯 (widget)
         - 레이아웃 (layout)
+        - 모바일 레이아웃 (mobile_layout)
         - 모듈 스킨 (module_skin)
+        - 모바일 모듈 스킨 (mobile_module_skin)
         - 위젯 스킨 (widget_skin)
         - 에디터 본문 스타일 (editor_style)
     validations:

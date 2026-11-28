@@ -6,8 +6,8 @@ from string import Template
 SITE = Path(__file__).resolve().parent / 'site'
 GROUPS = (
     ('modules', '모듈', ('module',)),
-    ('layouts', '레이아웃', ('layout',)),
-    ('skins', '스킨과 스타일', ('module_skin', 'widget_skin', 'editor_style')),
+    ('layouts', '레이아웃', ('layout', 'mobile_layout')),
+    ('skins', '스킨과 스타일', ('module_skin', 'mobile_module_skin', 'widget_skin', 'editor_style')),
     ('widgets', '위젯', ('widget',)),
     ('addons', '애드온', ('addon',)),
 )

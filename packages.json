@@ -288,5 +288,277 @@
         "notes": "XE1용으로 1.1.4 태그를 등록했습니다."
       }
     ]
+  },
+  {
+    "id": "xe_patches",
+    "type": "layout",
+    "title": "XE Patches 레이아웃",
+    "author": "XE Patches",
+    "repo": "YJSoft/xe-layout-xepatches",
+    "license": "GPL-2.0-or-later",
+    "description": "GitHub 릴리스, 변경 내역, 다운로드를 첫 화면에 보여 주는 반응형 레이아웃입니다.",
+    "thumbnail": "xe_patches.png",
+    "upgrade_from": {
+      "ae2d4e05de16d0761a7a63e706a97c827ce537b363866d8939fe3d5bcf5bf26b": "1.0.0"
+    },
+    "source_path": "layouts/xe_patches",
+    "releases": [
+      {
+        "version": "1.0.0",
+        "revision": "092f826383bdfec369032966dab97ebf6777f526",
+        "snapshot": true,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "withdrawn": false,
+        "notes": "관리자 화면에서 해당 레이아웃 또는 스킨을 선택하세요.",
+        "size": 31165,
+        "sha256": "db1a3c734195f17844d95a5ddf227a05498eb2088e36fa639d28432ba297805b",
+        "tree": "f824b16220d8c3fba2dff861c9f09115db7b0ea63bd8392e2a5b01bb2f8d500d"
+      }
+    ]
+  },
+  {
+    "id": "mobile_layout_xe_patches",
+    "type": "mobile_layout",
+    "title": "XE Patches 모바일 레이아웃",
+    "author": "XE Patches",
+    "repo": "YJSoft/xe-layout-xepatches",
+    "license": "GPL-2.0-or-later",
+    "description": "PC 레이아웃을 모바일 사이트에서도 사용할 수 있습니다.",
+    "thumbnail": "xepatches_mobile.png",
+    "upgrade_from": {
+      "3bea2906dbaa870702e34252612d1af91839f7b29399f4b08f5d02ab49bd18ec": "1.0.0"
+    },
+    "source_path": "m.layouts/xe_patches",
+    "requires": [
+      "xe_patches"
+    ],
+    "releases": [
+      {
+        "version": "1.0.0",
+        "revision": "092f826383bdfec369032966dab97ebf6777f526",
+        "snapshot": true,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "withdrawn": false,
+        "notes": "PC 자료를 먼저 설치한 뒤 관리자 화면에서 모바일용으로 선택하세요.",
+        "size": 11168,
+        "sha256": "f107b52465770269eee7bdb0eacc8c252b49646b9dc8b76afd4e1cf4f66b65f9",
+        "tree": "4391fc3ffe1fbfc92b99481ae0372f7bd0ab8e21fc14273c9048ebea1ab64246"
+      }
+    ]
+  },
+  {
+    "id": "board_skin_xe_patches",
+    "type": "module_skin",
+    "title": "XE Patches 게시판 스킨",
+    "author": "XE Patches",
+    "repo": "YJSoft/xe-skin-board-xepatches",
+    "license": "GPL-2.0-or-later",
+    "description": "공지, 글 목록, 댓글과 글쓰기 화면을 제공합니다.",
+    "thumbnail": "board_skin_xe_patches.png",
+    "upgrade_from": {
+      "ade400a5ee952ed6bae417f7fd8e2493106b2340f623c16d8404c6b939a8d072": "1.0.0"
+    },
+    "source_path": "modules/board/skins/xe_patches",
+    "requires": [
+      "xe_patches"
+    ],
+    "releases": [
+      {
+        "version": "1.0.0",
+        "revision": "49a209b0f522915f8a9546d75da6731d8a060fef",
+        "snapshot": true,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "withdrawn": false,
+        "notes": "관리자 화면에서 해당 레이아웃 또는 스킨을 선택하세요.",
+        "size": 29374,
+        "sha256": "95f4e47a37eb39169e80ff8891493bb569fce488959877e809c49b40d5932fec",
+        "tree": "cd00c8714645cd337c68cf60dbcab78661fdcae0136c62db38443293d83130f2"
+      }
+    ]
+  },
+  {
+    "id": "board_mskin_xe_patches",
+    "type": "mobile_module_skin",
+    "title": "XE Patches 게시판 모바일 스킨",
+    "author": "XE Patches",
+    "repo": "YJSoft/xe-skin-board-xepatches",
+    "license": "GPL-2.0-or-later",
+    "description": "PC 스킨을 모바일 게시판 화면에 적용합니다.",
+    "thumbnail": "xepatches_mobile.png",
+    "upgrade_from": {
+      "c70069b82d9a9b13f40637347e573d39031244b60550964a9c36a60c84f20104": "1.0.0"
+    },
+    "source_path": "modules/board/m.skins/xe_patches",
+    "requires": [
+      "board_skin_xe_patches"
+    ],
+    "releases": [
+      {
+        "version": "1.0.0",
+        "revision": "49a209b0f522915f8a9546d75da6731d8a060fef",
+        "snapshot": true,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "withdrawn": false,
+        "notes": "PC 자료를 먼저 설치한 뒤 관리자 화면에서 모바일용으로 선택하세요.",
+        "size": 10738,
+        "sha256": "f2b9efa0bd205f77cc44a742eaf3b500aeee91134d45f4d254316f4edd4d4632",
+        "tree": "05b95315ee9178efc87921ea8ec816dcac29d07946bb0aa9bf80c615a023c0b1"
+      }
+    ]
+  },
+  {
+    "id": "member_skin_xe_patches",
+    "type": "module_skin",
+    "title": "XE Patches 회원 스킨",
+    "author": "XE Patches",
+    "repo": "YJSoft/xe-skin-member-xepatches",
+    "license": "GPL-2.0-or-later",
+    "description": "로그인, 가입, 회원 정보와 계정 관리 화면을 제공합니다.",
+    "thumbnail": "member_skin_xe_patches.png",
+    "upgrade_from": {
+      "2c93420fa7bf735602ae1ddffcf515c30dda094b08db8c4672888e09aedd3f86": "1.0.0"
+    },
+    "source_path": "modules/member/skins/xe_patches",
+    "requires": [
+      "xe_patches"
+    ],
+    "releases": [
+      {
+        "version": "1.0.0",
+        "revision": "7d523cdb8ad52839542326ee0477c0a1399f77a1",
+        "snapshot": true,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "withdrawn": false,
+        "notes": "관리자 화면에서 해당 레이아웃 또는 스킨을 선택하세요.",
+        "size": 35068,
+        "sha256": "9f266a9d501c225c02058c8e4441a50f50e05e7efe5e84fad066f4aac29f1ac1",
+        "tree": "d2a31e98801b6412619b9526c5add09f3279fbcdc7763e5e882961aeb14442b3"
+      }
+    ]
+  },
+  {
+    "id": "member_mskin_xe_patches",
+    "type": "mobile_module_skin",
+    "title": "XE Patches 회원 모바일 스킨",
+    "author": "XE Patches",
+    "repo": "YJSoft/xe-skin-member-xepatches",
+    "license": "GPL-2.0-or-later",
+    "description": "PC 스킨을 모바일 회원 화면에 적용합니다.",
+    "thumbnail": "xepatches_mobile.png",
+    "upgrade_from": {
+      "f3d48bca8b60811b835132680013fcde612c4f318e3b83e32aa36a862eb4acad": "1.0.0"
+    },
+    "source_path": "modules/member/m.skins/xe_patches",
+    "requires": [
+      "member_skin_xe_patches"
+    ],
+    "releases": [
+      {
+        "version": "1.0.0",
+        "revision": "7d523cdb8ad52839542326ee0477c0a1399f77a1",
+        "snapshot": true,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "withdrawn": false,
+        "notes": "PC 자료를 먼저 설치한 뒤 관리자 화면에서 모바일용으로 선택하세요.",
+        "size": 13022,
+        "sha256": "76ad946169360c905dc6fe5e44b0e6264a534fcb59f8b3eb90266da1962e06b3",
+        "tree": "17e30b9ce39d546ac7a7bb3e4d4b192fd117a6d48334a1322531adb9e0ecdade"
+      }
+    ]
+  },
+  {
+    "id": "communication_skin_xe_patches",
+    "type": "module_skin",
+    "title": "XE Patches 커뮤니케이션 스킨",
+    "author": "XE Patches",
+    "repo": "YJSoft/xe-skin-communication-xepatches",
+    "license": "GPL-2.0-or-later",
+    "description": "회원 스킨의 계정 탭을 사용해 쪽지함과 친구 목록을 표시합니다.",
+    "thumbnail": "communication_skin_xe_patches.png",
+    "upgrade_from": {
+      "ddb1dd4280b9dc1d7b2c5caa739de736ce3096885deb3cdedbd26aed8aec96ff": "1.0.0"
+    },
+    "source_path": "modules/communication/skins/xe_patches",
+    "requires": [
+      "xe_patches",
+      "member_skin_xe_patches"
+    ],
+    "releases": [
+      {
+        "version": "1.0.0",
+        "revision": "6e1f18eb7aaec45f6281cdeae9064027923db6ba",
+        "snapshot": true,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "withdrawn": false,
+        "notes": "관리자 화면에서 해당 레이아웃 또는 스킨을 선택하세요.",
+        "size": 24980,
+        "sha256": "d3674c4394f55d2d70f09b36cfff59381992b9b56377ab6bac5f3d6a84700764",
+        "tree": "a9fdf5f3ecd2bfd9b2f239a8ea860a38f9f134c6be2830803fb0b59e014d74b8"
+      }
+    ]
+  },
+  {
+    "id": "communication_mskin_xe_patches",
+    "type": "mobile_module_skin",
+    "title": "XE Patches 커뮤니케이션 모바일 스킨",
+    "author": "XE Patches",
+    "repo": "YJSoft/xe-skin-communication-xepatches",
+    "license": "GPL-2.0-or-later",
+    "description": "PC 스킨을 모바일 커뮤니케이션 화면에 적용합니다.",
+    "thumbnail": "xepatches_mobile.png",
+    "upgrade_from": {
+      "8cae7c3c0c2579e1f56cef73e38409f07a21fb9b469a818d99942c10e50bb0ae": "1.0.0"
+    },
+    "source_path": "modules/communication/m.skins/xe_patches",
+    "requires": [
+      "communication_skin_xe_patches"
+    ],
+    "releases": [
+      {
+        "version": "1.0.0",
+        "revision": "6e1f18eb7aaec45f6281cdeae9064027923db6ba",
+        "snapshot": true,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "withdrawn": false,
+        "notes": "PC 자료를 먼저 설치한 뒤 관리자 화면에서 모바일용으로 선택하세요.",
+        "size": 10500,
+        "sha256": "d93967bf7d28987a7c052790f4a87897b52cf35082dfe54502f29458cebb3509",
+        "tree": "fb20169bb97cb38244091c1a0df54ae0d6acd20e250a51cb883acd2b20e63cce"
+      }
+    ]
+  },
+  {
+    "id": "xepatchauth",
+    "type": "module",
+    "title": "XE 계정 OAuth 로그인",
+    "author": "XE Patches",
+    "repo": "YJSoft/xe-module-xepatchauth",
+    "license": "GPL-2.0-only",
+    "description": "XE 회원 계정으로 외부 서비스 한 곳에 로그인하는 OpenID Connect 제공자입니다. PHP 8.4~8.6을 지원하며 설치 후 별도 서버 설정이 필요합니다.",
+    "thumbnail": "xepatchauth.png",
+    "upgrade_from": {},
+    "bundle_composer": true,
+    "releases": [
+      {
+        "version": "1.0.0",
+        "revision": "9084fb076c9f24832b4447d83459da5779addbe4",
+        "snapshot": true,
+        "php": "8.4.0",
+        "core": "1.11.0",
+        "withdrawn": false,
+        "notes": "Composer 의존성을 포함했습니다. PHP 8.4~8.6, cURL·OpenSSL·Sodium·PDO MySQL, HTTPS와 InnoDB가 필요합니다. 원본 README에 따라 비공개 설정·서명 키·웹 서버 경로 및 접근 제한을 설정한 뒤 관리자 화면에서 DB 테이블을 생성하세요.",
+        "size": 501732,
+        "sha256": "de632646d59bfeea87e87d57034de1935f195d3af4b12f9fcb5737d734cca16e",
+        "tree": "9ae91a22b31977763915ddc82193d2ce718a135869cfeb5edd0f8d7ccd0f5c2e"
+      }
+    ]
   }
 ]

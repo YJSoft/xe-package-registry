@@ -3,30 +3,59 @@
 import argparse
 import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import tarfile
+from tempfile import TemporaryDirectory
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 from publish import HERE, install_path, require, verify_release
 
 
 def pack(package, release, checkout):
+    if package.get('bundle_composer'):
+        return pack_composer(package, release, checkout)
     component = install_path(package)
     require(package['source_path'] == component, 'expected a split component')
+    notices = subprocess.check_output(['git', '-C', checkout, 'ls-tree', '--name-only',
+                                       release['revision'], 'LICENSE', 'NOTICE'], text=True).splitlines()
     data = subprocess.check_output(['git', '-C', checkout, 'archive', '--format=tar',
-                                    release['revision'], component, 'LICENSE'])
+                                    release['revision'], component, *notices])
     entries = {}
     with tarfile.open(fileobj=io.BytesIO(data), mode='r:') as tar:
         for item in tar:
-            if item.name == 'LICENSE':
-                entries['LICENSE'] = tar.extractfile(item).read()
+            if item.name in notices:
+                entries[item.name] = tar.extractfile(item).read()
             elif item.name.startswith(component + '/'):
                 name = item.name[len(component) + 1:]
                 require(item.isdir() or item.isfile(), 'unsupported component file')
-                require(name != 'LICENSE', 'preserve the component license separately')
+                require(name not in notices, 'preserve the component license separately')
                 entries[name + '/' if item.isdir() else name] = None if item.isdir() else tar.extractfile(item).read()
     require('LICENSE' in entries, 'missing upstream license')
+    return write_zip(component, entries)
+
+
+def pack_composer(package, release, checkout):
+    # Build from the pinned commit in a clean directory, without any local settings or keys.
+    data = subprocess.check_output(['git', '-C', checkout, 'archive', release['revision']])
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        with tarfile.open(fileobj=io.BytesIO(data), mode='r:') as tar:
+            tar.extractall(root, filter='data')
+        require((root / 'composer.lock').is_file(), 'expected a locked Composer project')
+        subprocess.run(['composer', 'install', '--no-dev', '--prefer-dist', '--no-plugins', '--no-scripts',
+                        '--optimize-autoloader', '--no-interaction'], cwd=root, check=True,
+                       env=dict(os.environ, COMPOSER_ROOT_VERSION=release['version']))
+        entries = {}
+        for path in root.rglob('*'):
+            require(not path.is_symlink() and (path.is_dir() or path.is_file()), 'unsupported Composer file')
+            name = path.relative_to(root).as_posix()
+            entries[name + '/' if path.is_dir() else name] = None if path.is_dir() else path.read_bytes()
+    return write_zip(package['repo'].split('/')[1] + '-' + release['revision'], entries)
+
+
+def write_zip(component, entries):
     archive = io.BytesIO()
     with ZipFile(archive, 'w') as output:
         for name, contents in sorted(entries.items()):

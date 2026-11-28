@@ -19,3 +19,9 @@ PR에서 `python3 publish.py /tmp/xe-registry-preview` 검사를 실행합니다
 스킨과 구성요소 ZIP을 지원하는 클라이언트는 `v1/index-v2.json`을 읽습니다. `v1/index.json`은 기존 클라이언트가 설치할 수 있는 자료를 계속 제공합니다.
 
 함께 설치해야 할 자료는 `requires`에 자료 ID 목록으로 지정합니다. 게시 전에 누락된 자료와 순환 참조를 검사합니다.
+
+게시판 스킨과 모바일 자료를 지원하는 클라이언트는 `v1/index-v3.json`을 사용합니다. 이전 목록에는 해당 클라이언트가 설치할 수 있는 자료와 의존 자료만 게시합니다.
+
+XE Patches 레이아웃과 게시판·회원·커뮤니케이션 스킨은 PC용과 모바일용 설치 경로가 달라 각각 등록했습니다. 모바일 자료를 선택하면 해당 PC 자료도 함께 설치됩니다. 커뮤니케이션 스킨은 회원 스킨을 사용하며 세 스킨 모두 PC 레이아웃의 스타일을 사용합니다. 각 ZIP에는 원본 LICENSE와 NOTICE가 들어 있습니다.
+
+XE 계정 OAuth 로그인은 Composer 2.8.8로 원본 커밋의 `composer.lock`을 설치해 라이브러리도 함께 배포합니다. ZIP은 `python3 pack_component.py /path/to/xe-module-xepatchauth xepatchauth 1.0.0 xepatchauth.zip`으로 재현할 수 있습니다. 고정된 JWT 라이브러리의 PHP 요구 버전은 8.4~8.6입니다. 서버 설정과 개인키는 운영자가 따로 준비합니다. [원본 설치 안내](https://github.com/YJSoft/xe-module-xepatchauth#설치)
