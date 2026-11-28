@@ -199,5 +199,82 @@
         "notes": "원본 저장소에서 이 구성요소와 GPLv2 라이선스 파일을 분리해 배포합니다."
       }
     ]
+  },
+  {
+    "id": "pagelocker",
+    "type": "module",
+    "title": "페이지 잠금",
+    "description": "비밀번호 인증이나 포인트 차감으로 페이지 또는 게시물의 열람을 제한합니다.",
+    "author": "퍼니XE (smaker)",
+    "repo": "YJSoft/xe-module-pagelocker",
+    "license": "LGPL-2.1",
+    "thumbnail": "pagelocker.png",
+    "upgrade_from": {
+      "a4e12d448af4145071e2366b939ccbfb0559c516ea6b6daf163a8478ac02c935": "1.1.4"
+    },
+    "releases": [
+      {
+        "version": "1.1.5",
+        "revision": "236a5785850b3817baea873faef8d084535b9cfc",
+        "snapshot": false,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "size": 506799,
+        "sha256": "cadf81de03c3e3d85135a90b568a0d09e90c5fd183548dc647a3e2d93354b80c",
+        "tree": "6e4f0ecf2ef736b719936952f862649d9886f11670e51416a6d18c703e3c64b7",
+        "withdrawn": false,
+        "notes": "퍼니XE 원작을 바탕으로 YJSoft 포크에서 XE1과 PHP 8의 잠금 설정, 인증 만료 및 포인트 차감 처리를 수정했습니다. 전체 페이지 캐시를 함께 사용한다면 잠금 대상 모듈을 캐시에서 제외하세요."
+      }
+    ]
+  },
+  {
+    "id": "supercache",
+    "type": "module",
+    "title": "슈퍼 캐시",
+    "description": "전체 페이지와 게시판, 위젯을 캐시해 반복 요청의 처리 시간을 줄입니다.",
+    "author": "포에시스",
+    "repo": "poesis/rhymix-supercache",
+    "license": "GPL-2.0-or-later",
+    "thumbnail": "supercache.png",
+    "upgrade_from": {},
+    "releases": [
+      {
+        "version": "1.3.9",
+        "revision": "c8dc009c404af950dfb951ebe67efa057101a26f",
+        "snapshot": true,
+        "php": "7.0.0",
+        "core": "1.11.0",
+        "size": 60250,
+        "sha256": "91ee9b01689c7e1df195a41c7801b1b5858c0f6de1881f1df3d26b5b5679557d",
+        "tree": "44610ee7b46b17e9a04904d7311d392fa1da7604f39b0fd39ad5871e897655e5",
+        "withdrawn": false,
+        "notes": "1.3.9 태그 이후 PHP 8 수정이 포함된 c8dc009 스냅샷입니다. 잠금 페이지 등 방문자마다 내용이 다른 모듈은 전체 페이지 캐시에서 제외하세요."
+      }
+    ]
+  },
+  {
+    "id": "sitemaplite",
+    "type": "module",
+    "title": "사이트맵 Lite",
+    "description": "메뉴와 문서 목록으로 검색엔진용 sitemap.xml을 만듭니다.",
+    "author": "포에시스",
+    "repo": "poesis/rhymix-sitemaplite",
+    "license": "GPL-2.0-or-later",
+    "thumbnail": "sitemaplite.png",
+    "upgrade_from": {},
+    "releases": [
+      {
+        "version": "1.1.4",
+        "revision": "e5b7ceed0afe166a3f3c3993d5b088a38f5dff00",
+        "snapshot": false,
+        "php": "5.3.0",
+        "core": "1.11.0",
+        "size": 17991,
+        "sha256": "6da933d45b251020d1f6b95cdb44df5d84027008e4487181c7d1a49db0568d7f",
+        "tree": "a570f711371c3db45b147b7a0892198e98ae663fc0ccebd358f13387d894a476",
+        "withdrawn": false,
+        "notes": "XE1용으로 1.1.4 태그를 등록했습니다."
+      }
+    ]
   }
 ]
