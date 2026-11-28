@@ -3,7 +3,6 @@
 import argparse
 import base64
 import hashlib
-import html
 import io
 import json
 from pathlib import Path
@@ -13,6 +12,8 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
+
+from catalogue import SITE, render
 
 HERE = Path(__file__).resolve().parent
 LIMIT = 32 * 1024 * 1024
@@ -141,7 +142,6 @@ def build(output, key, baseline):
     by_id = validate_dependencies(packages)
     summaries = {}
     legacy = {}
-    links = []
     for p in packages:
         name = p['id']
         install_path(p)
@@ -165,22 +165,15 @@ def build(output, key, baseline):
         summaries[name] = digest(detail)
         if 'source_path' not in p and not p.get('requires'):
             legacy[name] = digest(detail)
-        thumb = ''
         if 'thumbnail' in p:
             filename = p['thumbnail']
             require(re.fullmatch(r'[a-z][a-z0-9_-]{0,63}\.png', filename), 'invalid thumbnail filename')
             image = (HERE / 'thumbnails' / filename).read_bytes()
             require(image.startswith(b'\x89PNG\r\n\x1a\n') and len(image) <= 512 * 1024, 'invalid PNG thumbnail')
             atomic_write(output / 'v1/thumbnails' / filename, image)
-            thumb = '<img src="v1/thumbnails/%s" width="64" height="48" alt=""> ' % filename
-        downloads = ['<a download="%s-%s.zip" href="v1/files/%s.zip">%s ZIP 다운로드</a>' %
-                     (name, html.escape(r['version']), r['sha256'], html.escape(r['version']))
-                     for r in p['releases'] if not r['withdrawn']]
-        required = ['<a href="#%s">%s</a>' % (dep, html.escape(by_id[dep]['title'])) for dep in p.get('requires', [])]
-        dependencies = ' · 함께 설치할 자료 — ' + ', '.join(required) if required else ''
-        links.append('<li id="%s">%s<a href="https://github.com/%s">%s</a> · %s · %s%s</li>' %
-                     (name, thumb, html.escape(p['repo']), html.escape(p['title']), html.escape(p['license']), ' · '.join(downloads), dependencies))
-    atomic_write(output / 'index.html', ('<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>XE 쉬운설치 자료실</title><h1>XE 쉬운설치 자료실</h1><ul>' + ''.join(links) + '</ul><a href="v1/index-v2.json">서명된 자료 목록</a></html>').encode())
+    for filename in ('catalog.css', 'logo-light.png', 'logo-dark.png', 'favicon-light.png'):
+        atomic_write(output / 'assets' / filename, (SITE / filename).read_bytes())
+    atomic_write(output / 'index.html', render(packages, by_id))
     if key:
         now = int(time.time())
         public = subprocess.check_output(['openssl','pkey','-in',key,'-pubout'])

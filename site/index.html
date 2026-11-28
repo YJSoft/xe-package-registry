@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>쉬운설치 자료실 | XE Patches</title>
+  <meta name="description" content="XE1용 모듈, 레이아웃, 스킨의 버전과 필수 자료를 확인하고 ZIP 파일을 내려받으세요.">
+  <link rel="icon" href="assets/favicon-light.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600&amp;family=IBM+Plex+Sans+KR:wght@400;500;600&amp;family=JetBrains+Mono&amp;display=swap">
+  <link rel="stylesheet" href="assets/catalog.css">
+</head>
+<body>
+  <a class="skip" href="#catalogue">자료 목록 바로가기</a>
+  <header><div class="frame top">
+    <a class="brand" href="https://xe-patches.c01.kr/"><img src="assets/logo-light.png" width="186" height="32" alt="XE Patches"></a>
+    <nav aria-label="사이트 메뉴">
+      <a href="https://xe-patches.c01.kr/">소개</a>
+      <a href="https://xe-patches.c01.kr/notice">공지사항</a>
+      <a href="https://github.com/YJSoft/xe-core/releases">릴리스</a>
+      <a href="./" aria-current="page">자료실</a>
+    </nav>
+  </div></header>
+  <main id="catalogue">
+    <div class="mast"><div class="frame mast-inner">
+      <div class="intro">
+        <h1>XE 쉬운설치 자료실</h1>
+        <p>XE1에 설치할 자료를 찾아 버전과 라이선스를 확인하고 ZIP 파일을 내려받으세요.</p>
+      </div>
+      <nav class="directory" aria-label="자료 유형 바로가기">
+        <div class="directory-head"><strong>자료 유형</strong><span>전체 ${total}개</span></div>
+        ${category_links}
+      </nav>
+    </div></div>
+    <div class="frame catalogue">${sections}</div>
+  </main>
+  <footer><div class="frame foot">
+    <a class="brand" href="https://xe-patches.c01.kr/"><img src="assets/logo-dark.png" width="163" height="28" alt="XE Patches"></a>
+    <nav aria-label="자료실 관련 링크"><a href="https://github.com/YJSoft/xe-package-registry">자료 등록 저장소</a><a href="v1/index-v2.json">서명된 자료 목록</a></nav>
+  </div></footer>
+</body>
+</html>
