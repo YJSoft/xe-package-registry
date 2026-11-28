@@ -114,10 +114,31 @@ def check_history(old, packages):
             require(new and all(new[k] == r[k] for k in ('revision','size','sha256','tree')), 'published artifact changed or disappeared')
 
 
+def validate_dependencies(packages):
+    by_id = {p['id']: p for p in packages}
+    done = set()
+
+    def visit(name, visiting):
+        require(name in by_id and name not in visiting, 'missing or cyclic package dependency: ' + name)
+        if name in done:
+            return
+        required = by_id[name].get('requires', [])
+        require(isinstance(required, list) and all(isinstance(i, str) for i in required)
+                and len(required) == len(set(required)), 'invalid dependency list')
+        for dependency in required:
+            visit(dependency, visiting | {name})
+        done.add(name)
+
+    for name in by_id:
+        visit(name, set())
+    return by_id
+
+
 def build(output, key, baseline):
     packages = json.loads((HERE / 'packages.json').read_text())
     if baseline:
         check_history(json.loads(baseline.read_text()), packages)
+    by_id = validate_dependencies(packages)
     summaries = {}
     legacy = {}
     links = []
@@ -142,7 +163,7 @@ def build(output, key, baseline):
         location = 'v1/details/' + digest(detail) + '.json'
         atomic_write(output / location, detail)
         summaries[name] = digest(detail)
-        if 'source_path' not in p:
+        if 'source_path' not in p and not p.get('requires'):
             legacy[name] = digest(detail)
         thumb = ''
         if 'thumbnail' in p:
@@ -155,8 +176,10 @@ def build(output, key, baseline):
         downloads = ['<a download="%s-%s.zip" href="v1/files/%s.zip">%s ZIP 다운로드</a>' %
                      (name, html.escape(r['version']), r['sha256'], html.escape(r['version']))
                      for r in p['releases'] if not r['withdrawn']]
-        links.append('<li>%s<a href="https://github.com/%s">%s</a> · %s · %s</li>' %
-                     (thumb, html.escape(p['repo']), html.escape(p['title']), html.escape(p['license']), ' · '.join(downloads)))
+        required = ['<a href="#%s">%s</a>' % (dep, html.escape(by_id[dep]['title'])) for dep in p.get('requires', [])]
+        dependencies = ' · 함께 설치할 자료 — ' + ', '.join(required) if required else ''
+        links.append('<li id="%s">%s<a href="https://github.com/%s">%s</a> · %s · %s%s</li>' %
+                     (name, thumb, html.escape(p['repo']), html.escape(p['title']), html.escape(p['license']), ' · '.join(downloads), dependencies))
     atomic_write(output / 'index.html', ('<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>XE 쉬운설치 자료실</title><h1>XE 쉬운설치 자료실</h1><ul>' + ''.join(links) + '</ul><a href="v1/index-v2.json">서명된 자료 목록</a></html>').encode())
     if key:
         now = int(time.time())

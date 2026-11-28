@@ -79,6 +79,11 @@
         "withdrawn": false,
         "notes": "원본 저장소에서 이 구성요소와 GPLv2 라이선스 파일을 분리해 배포합니다."
       }
+    ],
+    "requires": [
+      "member_skin_simplestrap",
+      "communication_skin_simplestrap",
+      "content_skin_simplestrap_sb"
     ]
   },
   {

@@ -15,3 +15,5 @@ PR에서 `python3 publish.py /tmp/xe-registry-preview` 검사를 실행합니다
 자료별 PNG는 `thumbnails/`에 두고 `packages.json`의 `thumbnail`에 파일명을 등록합니다. 초기 섬네일은 XE에 포함된 XEIcon 글리프와 단색 배경으로 만들었습니다. [XEIcon](https://github.com/xpressengine/XEIcon)
 
 스킨과 구성요소 ZIP을 지원하는 클라이언트는 `v1/index-v2.json`을 읽습니다. `v1/index.json`은 기존 클라이언트가 설치할 수 있는 자료를 계속 제공합니다.
+
+함께 설치해야 할 자료는 `requires`에 자료 ID 목록으로 지정합니다. 게시 전에 누락된 자료와 순환 참조를 검사합니다.
