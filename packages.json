@@ -22,7 +22,9 @@
         "notes": "비회원 댓글 알림의 보안 문제를 수정한 릴리스."
       }
     ],
-    "type": "module"
+    "type": "module",
+    "description": "새 댓글과 쪽지 등 사이트 안에서 발생한 소식을 회원에게 알려줍니다.",
+    "icon": "bell"
   },
   {
     "id": "advanced_mailer",
@@ -47,6 +49,8 @@
         "notes": "메일 발송 API 및 PHP 8 관리자 테스트 발송 수정. 빈 도메인 그룹의 설정 화면 오류 수정."
       }
     ],
-    "type": "module"
+    "type": "module",
+    "description": "외부 SMTP 서버와 메일 서비스 API를 이용해 사이트 메일을 발송합니다.",
+    "icon": "envelope"
   }
 ]
