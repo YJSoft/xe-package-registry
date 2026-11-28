@@ -1,0 +1,64 @@
+name: 자료 등록 신청
+description: XE 쉬운설치 자료실에 배포할 자료를 신청합니다.
+title: "[자료 등록] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        이슈 제목에 자료 이름을 적어 주세요. 한 저장소에 레이아웃과 스킨이 함께 있어도 설치 경로가 다르면 각각 신청해 주세요.
+  - type: input
+    id: repository
+    attributes:
+      label: 원본 GitHub 저장소 주소
+      placeholder: "https://github.com/wincomi/xe-simplestrap"
+    validations:
+      required: true
+  - type: dropdown
+    id: package_type
+    attributes:
+      label: 자료 종류
+      options:
+        - 모듈 (module)
+        - 애드온 (addon)
+        - 위젯 (widget)
+        - 레이아웃 (layout)
+        - 모듈 스킨 (module_skin)
+        - 위젯 스킨 (widget_skin)
+        - 에디터 본문 스타일 (editor_style)
+    validations:
+      required: true
+  - type: input
+    id: install_path
+    attributes:
+      label: 설치 경로
+      description: XE 설치 폴더를 기준으로 자료가 들어갈 폴더를 적어 주세요.
+      placeholder: layouts/simplestrap
+    validations:
+      required: true
+  - type: input
+    id: min_php
+    attributes:
+      label: 최소 PHP 버전
+      placeholder: "5.3.0"
+    validations:
+      required: true
+  - type: input
+    id: min_xe
+    attributes:
+      label: 최소 XE 버전
+      placeholder: "1.11.0"
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 함께 설치해야 하는 의존 자료
+      description: |
+        이 자료를 쓰는 데 꼭 필요한 자료의 등록 이슈 번호를 한 줄에 하나씩 적어 주세요. 의존 자료가 없으면 ‘없음’이라고 적어 주세요.
+        아직 신청하지 않은 의존 자료는 먼저 이 저장소에 별도 이슈로 신청해 주세요. 이미 등록된 자료에 이슈가 없으면 자료 ID를 적어 주세요.
+        관리자는 연결된 신규 자료를 하나의 PR에서 함께 검토하고 등록합니다.
+      placeholder: |
+        #123 회원 스킨
+        #124 커뮤니케이션 스킨
+    validations:
+      required: true
