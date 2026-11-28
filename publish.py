@@ -25,6 +25,31 @@ RESERVED = {
 }
 
 
+# Only nested component locations reviewed for this installer are accepted.
+SKIN_PARENTS = {
+    'module_skin': {'modules/member/skins', 'modules/communication/skins'},
+    'editor_style': {'modules/editor/styles'},
+    'widget_skin': {'widgets/content/skins'},
+}
+BUILTIN_SKINS = {'default', 'ckeditor_light', 'ckeditor_recommend', 'dreditor', 'xestyle', 'xestyleblack'}
+DIRECTORIES = {'module': 'modules', 'addon': 'addons', 'layout': 'layouts', 'widget': 'widgets'}
+
+
+def install_path(package):
+    kind, name = package['type'], package['id']
+    if kind in SKIN_PARENTS:
+        parent, _, folder = package.get('source_path', '').rpartition('/')
+        require(parent in SKIN_PARENTS[kind] and re.fullmatch(r'[a-z][a-z0-9_]{0,63}', folder)
+                and folder not in BUILTIN_SKINS, 'invalid skin destination')
+        category = 'style' if kind == 'editor_style' else 'skin'
+        require(name == '_'.join([parent.split('/')[1], category, folder]), 'skin identity mismatch')
+        return parent + '/' + folder
+    require(kind in DIRECTORIES and name not in RESERVED[kind].split(), 'reserved installation path')
+    target = DIRECTORIES[kind] + '/' + name
+    require(package.get('source_path', target) == target, 'component source path mismatch')
+    return target
+
+
 def serialized(obj):
     return json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
 
@@ -40,7 +65,7 @@ def require(condition, message):
 
 def verify_release(package, release, archive):
     require(len(archive) == release['size'] and digest(archive) == release['sha256'], 'ZIP digest or size mismatch')
-    prefix = package['repo'].split('/')[1] + '-' + release['revision'] + '/'
+    prefix = package.get('source_path', package['repo'].split('/')[1] + '-' + release['revision']) + '/'
     entries = {}
     seen = set()
     size = 0
@@ -60,9 +85,12 @@ def verify_release(package, release, archive):
             kind = stat.S_IFMT(item.external_attr >> 16)
             require(size <= LIMIT and item.file_size <= 8 * 1024 * 1024 and kind in (0, stat.S_IFDIR, stat.S_IFREG), 'invalid ZIP entry')
             entries[path] = '-' if item.is_dir() else digest(z.read(item))
-        require(ENTRYPOINTS[package['type']].format(id=package['id']) in entries, 'missing package entry point')
-        info = ET.fromstring(z.read(prefix + 'conf/info.xml'))
-        require(info.tag == package['type'], 'package type mismatch')
+        skin = package['type'] in SKIN_PARENTS
+        descriptor = 'skin.xml' if skin else 'conf/info.xml'
+        if not skin:
+            require(ENTRYPOINTS[package['type']].format(id=package['id']) in entries, 'missing package entry point')
+        info = ET.fromstring(z.read(prefix + descriptor))
+        require(info.tag == ('skin' if skin else package['type']), 'package type mismatch')
         require(info.findtext('version') == release['version'], 'module version mismatch')
     tree = b''.join((name + '\0' + entries[name] + '\n').encode() for name in sorted(entries))
     require(digest(tree) == release['tree'], 'installed tree digest mismatch')
@@ -79,7 +107,7 @@ def check_history(old, packages):
     current = {p['id']: p for p in packages}
     for before in old:
         after = current.get(before['id'])
-        require(after and before['repo'] == after['repo'] and before.get('type', 'module') == after['type'], 'registered package identity changed')
+        require(after and before['repo'] == after['repo'] and before.get('type', 'module') == after['type'] and before.get('source_path') == after.get('source_path'), 'registered package identity changed')
         versions = {r['version']: r for r in after['releases']}
         for r in before['releases']:
             new = versions.get(r['version'])
@@ -91,11 +119,12 @@ def build(output, key, baseline):
     if baseline:
         check_history(json.loads(baseline.read_text()), packages)
     summaries = {}
+    legacy = {}
     links = []
     for p in packages:
         name = p['id']
-        require(p['type'] in ENTRYPOINTS and name not in RESERVED[p['type']].split(), 'reserved installation path')
-        require(re.fullmatch(r'[a-z][a-z0-9_]*', name) and name not in summaries, 'invalid or duplicate module id')
+        install_path(p)
+        require(re.fullmatch(r'[a-z][a-z0-9_]{0,63}', name) and name not in summaries, 'invalid or duplicate module id')
         require(re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_-]+', p['repo']), 'invalid repository')
         versions = set()
         for r in p['releases']:
@@ -113,16 +142,30 @@ def build(output, key, baseline):
         location = 'v1/details/' + digest(detail) + '.json'
         atomic_write(output / location, detail)
         summaries[name] = digest(detail)
-        links.append('<li><a href="https://github.com/%s">%s</a> · <a href="%s">버전 정보</a></li>' %
-                     (html.escape(p['repo']), html.escape(p['title']), location))
-    atomic_write(output / 'index.html', ('<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>XE 쉬운설치 자료실</title><h1>XE 쉬운설치 자료실</h1><ul>' + ''.join(links) + '</ul><a href="v1/index.json">서명된 자료 목록</a></html>').encode())
+        if 'source_path' not in p:
+            legacy[name] = digest(detail)
+        thumb = ''
+        if 'thumbnail' in p:
+            filename = p['thumbnail']
+            require(re.fullmatch(r'[a-z][a-z0-9_-]{0,63}\.png', filename), 'invalid thumbnail filename')
+            image = (HERE / 'thumbnails' / filename).read_bytes()
+            require(image.startswith(b'\x89PNG\r\n\x1a\n') and len(image) <= 512 * 1024, 'invalid PNG thumbnail')
+            atomic_write(output / 'v1/thumbnails' / filename, image)
+            thumb = '<img src="v1/thumbnails/%s" width="64" height="48" alt=""> ' % filename
+        downloads = ['<a download="%s-%s.zip" href="v1/files/%s.zip">%s ZIP 다운로드</a>' %
+                     (name, html.escape(r['version']), r['sha256'], html.escape(r['version']))
+                     for r in p['releases'] if not r['withdrawn']]
+        links.append('<li>%s<a href="https://github.com/%s">%s</a> · %s · %s</li>' %
+                     (thumb, html.escape(p['repo']), html.escape(p['title']), html.escape(p['license']), ' · '.join(downloads)))
+    atomic_write(output / 'index.html', ('<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>XE 쉬운설치 자료실</title><h1>XE 쉬운설치 자료실</h1><ul>' + ''.join(links) + '</ul><a href="v1/index-v2.json">서명된 자료 목록</a></html>').encode())
     if key:
         now = int(time.time())
-        payload = serialized(dict(schema=1, generation=now, issued=now, expires=now + 21 * 86400, packages=summaries))
-        sig = subprocess.run(['openssl','dgst','-sha256','-sign',key], input=payload, capture_output=True, check=True).stdout
         public = subprocess.check_output(['openssl','pkey','-in',key,'-pubout'])
         require(public == (HERE / 'registry.pem').read_bytes(), 'signing key mismatch')
-        atomic_write(output / 'v1/index.json', serialized(dict(payload=base64.b64encode(payload).decode(), signature=base64.b64encode(sig).decode())))
+        for schema, filename, catalog in [(1, 'index.json', legacy), (2, 'index-v2.json', summaries)]:
+            payload = serialized(dict(schema=schema, generation=now, issued=now, expires=now + 21 * 86400, packages=catalog))
+            sig = subprocess.run(['openssl','dgst','-sha256','-sign',key], input=payload, capture_output=True, check=True).stdout
+            atomic_write(output / 'v1' / filename, serialized(dict(payload=base64.b64encode(payload).decode(), signature=base64.b64encode(sig).decode())))
 
 
 if __name__ == '__main__':
