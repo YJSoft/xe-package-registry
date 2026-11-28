@@ -1,4 +1,4 @@
-# XE 쉬운설치 자료실
+# XE 쉬운설치 비공식 자료실
 
 XE 비공식 패치의 쉬운설치 모듈에서 읽는 공개 자료실입니다. 자료 목록과 상세 정보, 배포 ZIP은 [GitHub Pages](https://yjsoft.github.io/xe-package-registry/)에서 제공합니다.
 

@@ -1,5 +1,5 @@
 name: 자료 등록 신청
-description: XE 쉬운설치 자료실에 배포할 자료를 신청합니다.
+description: XE 쉬운설치 비공식 자료실에 배포할 자료를 신청합니다.
 title: "[자료 등록] "
 body:
   - type: markdown
